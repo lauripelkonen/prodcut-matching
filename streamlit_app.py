@@ -73,12 +73,36 @@ def main():
         st.write("Unmatched Products:")
         st.dataframe(unmatched_df)
 
+        # Ensure product prices are numeric
+        matched_df['product_price_1'] = pd.to_numeric(matched_df['product_price_1'], errors='coerce')
+        matched_df['product_price_2'] = pd.to_numeric(matched_df['product_price_2'], errors='coerce')
+
         # Price comparison
         matched_df['price_difference'] = matched_df['product_price_1'] - matched_df['product_price_2']
 
+        # Convert DataFrames to Excel files in memory
+        matched_buffer = io.BytesIO()
+        unmatched_buffer = io.BytesIO()
+
+        # Write DataFrames to the in-memory buffers
+        with pd.ExcelWriter(matched_buffer, engine='xlsxwriter') as writer:
+            matched_df.to_excel(writer, index=False)
+        with pd.ExcelWriter(unmatched_buffer, engine='xlsxwriter') as writer:
+            unmatched_df.to_excel(writer, index=False)
+
         # Download buttons
-        st.download_button("Download Matched Products", matched_df.to_excel(index=False), file_name='matched_products.xlsx')
-        st.download_button("Download Unmatched Products", unmatched_df.to_excel(index=False), file_name='unmatched_products.xlsx')
+        st.download_button(
+            label="Download Matched Products",
+            data=matched_buffer.getvalue(),
+            file_name='matched_products.xlsx',
+            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
+        st.download_button(
+            label="Download Unmatched Products",
+            data=unmatched_buffer.getvalue(),
+            file_name='unmatched_products.xlsx',
+            mime='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        )
 
 if __name__ == "__main__":
     main()
