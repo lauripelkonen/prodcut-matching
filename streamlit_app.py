@@ -4,6 +4,7 @@ import numpy as np
 from sentence_transformers import SentenceTransformer
 from sklearn.neighbors import NearestNeighbors
 import re
+import io
 
 # Function to normalize text
 def normalize(text):
